@@ -37,6 +37,40 @@ export default async function handler(req, res) {
 
         }
 
+        
+
+    }
+
+    else if (method === 'GET') {
+
+        const { title, author, genre, publicationDate } = req.query;
+
+        try {
+            // Find books in the Inventory table with optional filters
+            const books = await prisma.inventory.findMany({
+                where: {
+                    title: title ? { contains: title } : undefined, // Filter by title if provided
+                    author: author ? { contains: author } : undefined, // Filter by author if provided
+                    genre: genre ? { contains: genre } : undefined, // Filter by genre if provided
+                    publicationDate: publicationDate ? new Date(publicationDate) : undefined, // Filter by date if provided
+                },
+            });
+      
+            return res.status(200).json(books);
+
+        } catch (error) {
+
+            return res.status(500).json({ error: "Failed to retrieve books" });
+
+        }
+
+    }
+
+    else {
+
+        res.setHeader('Allow', ['POST', 'GET']); 
+        res.status(405).end(`Method ${method} Not Allowed`);
+
     }
 
 }
